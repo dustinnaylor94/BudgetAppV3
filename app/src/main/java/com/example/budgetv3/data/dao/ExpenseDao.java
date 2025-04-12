@@ -23,6 +23,9 @@ public interface ExpenseDao {
     @Query("SELECT * FROM expenses WHERE budgetId = :budgetId ORDER BY date DESC")
     LiveData<List<Expense>> getExpensesForBudget(int budgetId);
 
+    @Query("SELECT * FROM expenses WHERE budgetId = :budgetId ORDER BY date DESC")
+    List<Expense> getExpensesForBudgetSync(int budgetId);
+
     @Query("SELECT * FROM expenses WHERE id = :expenseId")
     LiveData<Expense> getExpenseById(int expenseId);
 

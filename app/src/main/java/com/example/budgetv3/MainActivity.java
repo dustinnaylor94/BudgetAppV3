@@ -153,11 +153,14 @@ public class MainActivity extends AppCompatActivity {
                             });
 
                             // Convert expenses for this budget
-                            viewModel.getExpensesForBudget(budget.getId()).observe(MainActivity.this, expenses -> {
-                                // Remove the observer to prevent multiple conversions
-                                viewModel.getExpensesForBudget(budget.getId()).removeObservers(MainActivity.this);
-
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                List<Expense> expenses = AppDatabase.getDatabase(getApplicationContext())
+                                    .expenseDao()
+                                    .getExpensesForBudgetSync(budget.getId());
+                                
+                                Log.d("MainActivity", "Converting " + expenses.size() + " expenses for budget " + budget.getId());
                                 for (Expense expense : expenses) {
+                                    Log.d("MainActivity", "Expense before conversion: " + expense.getAmount() + " " + expense.getOriginalCurrency());
                                     double expenseAmount = expense.getAmount();
                                     CurrencyApi.convertCurrency(fromCurrency, toCurrency, expenseAmount,
                                         new CurrencyApi.ConversionCallback() {
