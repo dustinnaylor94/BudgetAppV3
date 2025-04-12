@@ -74,6 +74,8 @@ public class CurrencyApi {
         });
     }
 
+    private static final String EXCHANGE_RATES_URL = "/latest/"; // New endpoint for getting all rates
+
     public static void convertCurrency(String fromCurrency, String toCurrency, double amount, ConversionCallback callback) {
         Log.d("CurrencyApi", "Converting " + amount + " from " + fromCurrency + " to " + toCurrency);
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -81,9 +83,9 @@ public class CurrencyApi {
 
         executor.execute(() -> {
             try {
-                // First get the conversion rate
-                String rateUrl = BASE_URL + API_KEY + PAIR_CONVERSION_URL + fromCurrency + "/" + toCurrency + "/1";
-                Log.d("CurrencyApi", "Getting rate from URL: " + rateUrl);
+                // Get base rates from USD (API's base currency)
+                String rateUrl = BASE_URL + API_KEY + EXCHANGE_RATES_URL + "USD";
+                Log.d("CurrencyApi", "Getting rates from URL: " + rateUrl);
                 URL url = new URL(rateUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -99,8 +101,29 @@ public class CurrencyApi {
                 reader.close();
 
                 JSONObject jsonResponse = new JSONObject(response.toString());
-                double conversionRate = jsonResponse.getDouble("conversion_result");
-                Log.d("CurrencyApi", "Conversion rate from " + fromCurrency + " to " + toCurrency + ": " + conversionRate);
+                JSONObject rates = jsonResponse.getJSONObject("conversion_rates");
+
+                // Log all available rates for debugging
+                Log.d("CurrencyApi", "Available rates: " + rates.toString());
+
+                // Get rates relative to USD
+                double fromRate = fromCurrency.equals("USD") ? 1.0 : rates.getDouble(fromCurrency);
+                double toRate = toCurrency.equals("USD") ? 1.0 : rates.getDouble(toCurrency);
+
+                Log.d("CurrencyApi", String.format("%s rate: %.6f", fromCurrency, fromRate));
+                Log.d("CurrencyApi", String.format("%s rate: %.6f", toCurrency, toRate));
+
+                // Calculate the actual conversion rate
+                double conversionRate;
+                if (fromCurrency.equals("USD")) {
+                    conversionRate = toRate;
+                } else if (toCurrency.equals("USD")) {
+                    conversionRate = 1.0 / fromRate;
+                } else {
+                    conversionRate = toRate / fromRate;
+                }
+
+                Log.d("CurrencyApi", String.format("Rate from %s to %s: %.6f", fromCurrency, toCurrency, conversionRate));
 
                 // Validate the conversion rate
                 if (conversionRate <= 0) {

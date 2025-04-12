@@ -20,8 +20,11 @@ public interface BudgetDao {
     @Delete
     void delete(Budget budget);
 
-    @Query("SELECT * FROM budgets ORDER BY name ASC")
+    @Query("SELECT * FROM budgets ORDER BY id DESC")
     LiveData<List<Budget>> getAllBudgets();
+
+    @Query("SELECT * FROM budgets ORDER BY id DESC")
+    List<Budget> getAllBudgetsSync();
 
     @Query("SELECT * FROM budgets WHERE id = :budgetId")
     LiveData<Budget> getBudgetById(int budgetId);

@@ -110,15 +110,24 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        viewModel.getAllBudgets().observe(this, budgets -> {
-            // Remove the observer to prevent multiple conversions
-            viewModel.getAllBudgets().removeObservers(this);
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            // Get budgets directly from database
+            List<Budget> budgets = AppDatabase.getDatabase(getApplicationContext())
+                    .budgetDao()
+                    .getAllBudgetsSync();
+
+            Log.d("MainActivity", "Converting " + budgets.size() + " budgets from " + fromCurrency + " to " + toCurrency);
+            for (Budget budget : budgets) {
+                Log.d("MainActivity", "Budget before conversion: " + budget.getAmount() + " " + budget.getCurrency());
+            }
 
             AtomicInteger pendingConversions = new AtomicInteger(budgets.size());
             if (budgets.isEmpty()) {
-                progressDialog.dismiss();
-                currentCurrency = toCurrency;
-                Toast.makeText(this, "Currency updated to " + toCurrency, Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    currentCurrency = toCurrency;
+                    Toast.makeText(this, "Currency updated to " + toCurrency, Toast.LENGTH_SHORT).show();
+                });
                 return;
             }
 
@@ -128,9 +137,20 @@ public class MainActivity extends AppCompatActivity {
                     new CurrencyApi.ConversionCallback() {
                         @Override
                         public void onSuccess(double convertedAmount) {
-                            budget.setAmount(convertedAmount);
-                            budget.setCurrency(toCurrency);
-                            viewModel.updateBudget(budget);
+                            Log.d("MainActivity", "Converting budget: " + budget.getAmount() + " " + budget.getCurrency() + " to " + convertedAmount + " " + toCurrency);
+                            
+                            // Create final copies for the lambda
+                            final double finalConvertedAmount = convertedAmount;
+                            final Budget finalBudget = budget;
+                            
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                finalBudget.setAmount(finalConvertedAmount);
+                                finalBudget.setCurrency(toCurrency);
+                                AppDatabase.getDatabase(getApplicationContext())
+                                    .budgetDao()
+                                    .update(finalBudget);
+                                Log.d("MainActivity", "Updated budget in database: " + finalBudget.getAmount() + " " + finalBudget.getCurrency());
+                            });
 
                             // Convert expenses for this budget
                             viewModel.getExpensesForBudget(budget.getId()).observe(MainActivity.this, expenses -> {
@@ -143,9 +163,18 @@ public class MainActivity extends AppCompatActivity {
                                         new CurrencyApi.ConversionCallback() {
                                             @Override
                                             public void onSuccess(double convertedExpenseAmount) {
-                                                expense.setAmount(convertedExpenseAmount);
-                                                expense.setOriginalCurrency(toCurrency);
-                                                viewModel.updateExpense(expense);
+                                                // Create final copies for the lambda
+                                                final double finalExpenseAmount = convertedExpenseAmount;
+                                                final Expense finalExpense = expense;
+                                                
+                                                AppDatabase.databaseWriteExecutor.execute(() -> {
+                                                    finalExpense.setAmount(finalExpenseAmount);
+                                                    finalExpense.setOriginalCurrency(toCurrency);
+                                                    AppDatabase.getDatabase(getApplicationContext())
+                                                        .expenseDao()
+                                                        .update(finalExpense);
+                                                    Log.d("MainActivity", "Updated expense in database: " + finalExpense.getAmount() + " " + finalExpense.getOriginalCurrency());
+                                                });
                                             }
 
                                             @Override

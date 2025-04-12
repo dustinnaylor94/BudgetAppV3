@@ -59,11 +59,11 @@ public class BudgetAdapter extends ListAdapter<Budget, BudgetAdapter.BudgetViewH
         void bind(Budget budget) {
             binding.budgetNameText.setText(budget.getName());
             
-            String totalAmount = currencyFormatter.format(budget.getAmount());
+            binding.budgetAmount.setText(String.format("%.2f %s", budget.getAmount(), budget.getCurrency()));
             String spentAmount = currencyFormatter.format(budget.getSpent());
             String remainingAmount = currencyFormatter.format(budget.getAmount() - budget.getSpent());
 
-            binding.totalText.setText(itemView.getContext().getString(R.string.budget_total, totalAmount));
+            binding.totalText.setText(itemView.getContext().getString(R.string.budget_total, String.format("%.2f %s", budget.getAmount(), budget.getCurrency())));
             binding.spentText.setText(itemView.getContext().getString(R.string.budget_spent, spentAmount));
             binding.remainingText.setText(itemView.getContext().getString(R.string.budget_remaining, remainingAmount));
 
