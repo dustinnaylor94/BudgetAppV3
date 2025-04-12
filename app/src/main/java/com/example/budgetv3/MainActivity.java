@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 import com.example.budgetv3.R;
 import com.example.budgetv3.databinding.ActivityMainBinding;
+import com.example.budgetv3.ui.dialog.CurrencyDialog;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -28,8 +29,7 @@ public class MainActivity extends AppCompatActivity {
             return navController.navigateUp() || super.onOptionsItemSelected(item);
         }
         if (item.getItemId() == R.id.action_set_currency) {
-            // TODO: Implement currency selection
-            Toast.makeText(this, "Set Currency clicked", Toast.LENGTH_SHORT).show();
+            showCurrencyDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -45,6 +45,15 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView navigationView;
     private ActivityMainBinding binding;
     private AppBarConfiguration appBarConfiguration;
+
+    private void showCurrencyDialog() {
+        CurrencyDialog dialog = new CurrencyDialog();
+        dialog.setListener(currency -> {
+            // TODO: Save selected currency as default
+            Toast.makeText(this, "Selected currency: " + currency, Toast.LENGTH_SHORT).show();
+        });
+        dialog.show(getSupportFragmentManager(), "currency_dialog");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

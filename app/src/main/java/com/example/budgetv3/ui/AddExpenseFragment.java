@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import com.example.budgetv3.data.entity.Budget;
 import com.example.budgetv3.databinding.FragmentAddExpenseBinding;
+import com.example.budgetv3.ui.dialog.CurrencyDialog;
 import com.example.budgetv3.ui.viewmodel.AddExpenseViewModel;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import java.text.SimpleDateFormat;
@@ -50,6 +51,7 @@ public class AddExpenseFragment extends Fragment {
             Navigation.findNavController(v).navigateUp());
         
         binding.dateInput.setOnClickListener(v -> showDatePicker());
+        binding.currencySpinner.setOnClickListener(v -> showCurrencyDialog());
         binding.datePickerButton.setOnClickListener(v -> showDatePicker());
         
         // Set default date to today
@@ -68,6 +70,14 @@ public class AddExpenseFragment extends Fragment {
         ArrayAdapter<Budget> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_dropdown_item_1line, budgets);
         binding.budgetSpinner.setAdapter(adapter);
+    }
+
+    private void showCurrencyDialog() {
+        CurrencyDialog dialog = new CurrencyDialog();
+        dialog.setListener(currency -> {
+            binding.currencySpinner.setText(currency);
+        });
+        dialog.show(getParentFragmentManager(), "currency_dialog");
     }
 
     private void showDatePicker() {
