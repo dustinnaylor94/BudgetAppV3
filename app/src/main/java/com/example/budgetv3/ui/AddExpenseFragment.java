@@ -14,12 +14,20 @@ import androidx.navigation.Navigation;
 import com.example.budgetv3.data.entity.Budget;
 import com.example.budgetv3.databinding.FragmentAddExpenseBinding;
 import com.example.budgetv3.ui.viewmodel.AddExpenseViewModel;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class AddExpenseFragment extends Fragment {
     private FragmentAddExpenseBinding binding;
     private AddExpenseViewModel viewModel;
     private List<Budget> budgets;
+    private Date selectedDate;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,6 +48,13 @@ public class AddExpenseFragment extends Fragment {
         binding.saveButton.setOnClickListener(v -> saveExpense());
         binding.cancelButton.setOnClickListener(v -> 
             Navigation.findNavController(v).navigateUp());
+        
+        binding.dateInput.setOnClickListener(v -> showDatePicker());
+        binding.datePickerButton.setOnClickListener(v -> showDatePicker());
+        
+        // Set default date to today
+        selectedDate = new Date();
+        updateDateDisplay();
     }
 
     private void observeBudgets() {
@@ -53,6 +68,27 @@ public class AddExpenseFragment extends Fragment {
         ArrayAdapter<Budget> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_dropdown_item_1line, budgets);
         binding.budgetSpinner.setAdapter(adapter);
+    }
+
+    private void showDatePicker() {
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select date")
+                .setSelection(selectedDate.getTime())
+                .build();
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            // Convert UTC to local date
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.setTimeInMillis(selection);
+            selectedDate = calendar.getTime();
+            updateDateDisplay();
+        });
+
+        datePicker.show(getParentFragmentManager(), "date_picker");
+    }
+
+    private void updateDateDisplay() {
+        binding.dateInput.setText(dateFormat.format(selectedDate));
     }
 
     private void saveExpense() {
@@ -92,7 +128,7 @@ public class AddExpenseFragment extends Fragment {
         try {
             double amount = Double.parseDouble(amountStr);
             
-            viewModel.saveExpense(name, amount, selectedBudget.getId());
+            viewModel.saveExpense(name, amount, selectedBudget.getId(), selectedDate);
             Toast.makeText(requireContext(), "Expense saved", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp();
         } catch (NumberFormatException e) {

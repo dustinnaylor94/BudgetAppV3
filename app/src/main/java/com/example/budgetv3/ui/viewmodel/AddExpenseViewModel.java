@@ -28,9 +28,9 @@ public class AddExpenseViewModel extends AndroidViewModel {
         return budgets;
     }
 
-    public void saveExpense(String name, double amount, int budgetId) {
+    public void saveExpense(String name, double amount, int budgetId, Date date) {
         // For now, we'll use USD and set converted amount same as original
-        Expense expense = new Expense(budgetId, name, amount, "USD", amount, new Date());
+        Expense expense = new Expense(budgetId, name, amount, "USD", amount, date);
         
         new Thread(() -> {
             // Save the expense
