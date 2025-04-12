@@ -59,4 +59,9 @@ public class Budget {
     public void setSpent(double spent) {
         this.spent = spent;
     }
+
+    @Override
+    public String toString() {
+        return name + " ($" + amount + " USD)";
+    }
 }
