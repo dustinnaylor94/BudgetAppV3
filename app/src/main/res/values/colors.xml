@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Budget Progress Colors -->
+    <color name="progress_normal">#FF1976D2</color>
+    <color name="progress_warning">#FFFFA000</color>
+    <color name="progress_error">#FFD32F2F</color>
 </resources>

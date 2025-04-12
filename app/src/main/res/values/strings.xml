@@ -1,3 +1,39 @@
 <resources>
     <string name="app_name">BudgetV3</string>
+    
+    <!-- Common -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Add Budget Screen -->
+    <string name="add_budget_title">Add New Budget</string>
+    <string name="budget_name_hint">Budget Name</string>
+    <string name="amount_hint">Amount</string>
+    
+    <!-- Add Expense Screen -->
+    <string name="add_expense_title">Add New Expense</string>
+    <string name="select_budget_hint">Select Budget</string>
+    <string name="expense_name_hint">Expense Name</string>
+    <string name="select_currency_hint">Select Currency</string>
+    <string name="date_hint">Date</string>
+    
+    <!-- Home Screen -->
+    <string name="empty_state_image">No budgets illustration</string>
+    <string name="empty_state_title">No Budgets</string>
+    <string name="empty_state_message">You have not created any budgets yet. Use the Add Budget tab to create one.</string>
+    <string name="add_first_budget">Create Your First Budget</string>
+    <string name="add_budget">Add Budget</string>
+    <string name="budget_total">Total Budget: %s</string>
+    <string name="budget_spent">Spent: %s</string>
+    <string name="budget_remaining">Remaining: %s</string>
+    
+    <!-- Currency Options (Temporary) -->
+    <string-array name="currencies">
+        <item>USD - US Dollar</item>
+        <item>EUR - Euro</item>
+        <item>GBP - British Pound</item>
+        <item>JPY - Japanese Yen</item>
+        <item>CAD - Canadian Dollar</item>
+        <item>AUD - Australian Dollar</item>
+    </string-array>
 </resources>

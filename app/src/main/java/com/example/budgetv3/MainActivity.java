@@ -2,12 +2,14 @@ package com.example.budgetv3;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private NavController navController;
     private BottomNavigationView navigationView;
 
     @Override
@@ -15,34 +17,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setOnItemSelectedListener(item -> {
-            Fragment fragment;
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.navigation_home) {
-                fragment = new HomeFragment();
-            } else if (itemId == R.id.navigation_add_budget) {
-                fragment = new AddBudgetFragment();
-            } else if (itemId == R.id.navigation_add_expense) {
-                fragment = new AddExpenseFragment();
-            } else {
-                return false;
-            }
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment, fragment)
-                    .commit();
-            return true;
-        });
-
-        // Set default fragment
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.nav_host_fragment, new HomeFragment())
-                    .commit();
+        // Set up Navigation
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+            navigationView = findViewById(R.id.nav_view);
+            NavigationUI.setupWithNavController(navigationView, navController);
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        return navController.navigateUp() || super.onSupportNavigateUp();
     }
 }
