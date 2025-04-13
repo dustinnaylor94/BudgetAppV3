@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CurrencyApi {
-    private static final String API_KEY = "3fdadd9c8416675327e7ce97"; // You'll paste your API key here
+    private static final String API_KEY = "27c7bb12287896c70076237c"; // You'll paste your API key here
     private static final String BASE_URL = "https://v6.exchangerate-api.com/v6/";
     private static final String PAIR_CONVERSION_URL = "/pair/";
 
