@@ -13,7 +13,7 @@ import com.example.budgetv3.data.entity.Expense;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Budget.class, Expense.class}, version = 1)
+@Database(entities = {Budget.class, Expense.class}, version = 2)
 @TypeConverters({DateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase INSTANCE;

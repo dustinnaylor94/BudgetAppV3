@@ -11,12 +11,14 @@ public class Budget {
     private double amount;
     private String currency;
     private double spent;
+    private String spentCurrency; // Currency of the spent amount
 
     public Budget(String name, double amount, String currency) {
         this.name = name;
         this.amount = amount;
         this.currency = currency;
         this.spent = 0.0;
+        this.spentCurrency = currency;
     }
 
     // Getters and Setters
@@ -58,6 +60,14 @@ public class Budget {
 
     public void setSpent(double spent) {
         this.spent = spent;
+    }
+
+    public String getSpentCurrency() {
+        return spentCurrency;
+    }
+
+    public void setSpentCurrency(String spentCurrency) {
+        this.spentCurrency = spentCurrency;
     }
 
     @Override

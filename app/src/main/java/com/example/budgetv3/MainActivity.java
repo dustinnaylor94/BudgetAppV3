@@ -143,14 +143,30 @@ public class MainActivity extends AppCompatActivity {
                             final double finalConvertedAmount = convertedAmount;
                             final Budget finalBudget = budget;
                             
-                            AppDatabase.databaseWriteExecutor.execute(() -> {
-                                finalBudget.setAmount(finalConvertedAmount);
-                                finalBudget.setCurrency(toCurrency);
-                                AppDatabase.getDatabase(getApplicationContext())
-                                    .budgetDao()
-                                    .update(finalBudget);
-                                Log.d("MainActivity", "Updated budget in database: " + finalBudget.getAmount() + " " + finalBudget.getCurrency());
-                            });
+                            // Convert spent amount
+                            CurrencyApi.convertCurrency(budget.getSpentCurrency(), toCurrency, budget.getSpent(),
+                                new CurrencyApi.ConversionCallback() {
+                                    @Override
+                                    public void onSuccess(double convertedSpentAmount) {
+                                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                                            finalBudget.setAmount(finalConvertedAmount);
+                                            finalBudget.setCurrency(toCurrency);
+                                            finalBudget.setSpent(convertedSpentAmount);
+                                            finalBudget.setSpentCurrency(toCurrency);
+                                            AppDatabase.getDatabase(getApplicationContext())
+                                                .budgetDao()
+                                                .update(finalBudget);
+                                            Log.d("MainActivity", "Updated budget in database: " + 
+                                                finalBudget.getAmount() + " " + finalBudget.getCurrency() + 
+                                                " (spent: " + finalBudget.getSpent() + " " + finalBudget.getSpentCurrency() + ")");
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        Log.e("MainActivity", "Error converting spent amount: " + errorMessage);
+                                    }
+                                });
 
                             // Convert expenses for this budget
                             AppDatabase.databaseWriteExecutor.execute(() -> {

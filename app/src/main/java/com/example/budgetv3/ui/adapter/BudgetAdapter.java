@@ -59,13 +59,17 @@ public class BudgetAdapter extends ListAdapter<Budget, BudgetAdapter.BudgetViewH
         void bind(Budget budget) {
             binding.budgetNameText.setText(budget.getName());
             
-            binding.budgetAmount.setText(String.format("%.2f %s", budget.getAmount(), budget.getCurrency()));
-            String spentAmount = currencyFormatter.format(budget.getSpent());
-            String remainingAmount = currencyFormatter.format(budget.getAmount() - budget.getSpent());
+            String currency = budget.getCurrency();
+            binding.budgetAmount.setText(String.format("%.2f %s", budget.getAmount(), currency));
+            double spent = budget.getSpent();
+            double remaining = budget.getAmount() - spent;
 
-            binding.totalText.setText(itemView.getContext().getString(R.string.budget_total, String.format("%.2f %s", budget.getAmount(), budget.getCurrency())));
-            binding.spentText.setText(itemView.getContext().getString(R.string.budget_spent, spentAmount));
-            binding.remainingText.setText(itemView.getContext().getString(R.string.budget_remaining, remainingAmount));
+            binding.totalText.setText(itemView.getContext().getString(R.string.budget_total, 
+                String.format("%.2f %s", budget.getAmount(), currency)));
+            binding.spentText.setText(itemView.getContext().getString(R.string.budget_spent, 
+                String.format("%.2f %s", spent, currency)));
+            binding.remainingText.setText(itemView.getContext().getString(R.string.budget_remaining, 
+                String.format("%.2f %s", remaining, currency)));
 
             // Calculate progress percentage (0-100)
             int progress = (int) ((budget.getSpent() / budget.getAmount()) * 100);
