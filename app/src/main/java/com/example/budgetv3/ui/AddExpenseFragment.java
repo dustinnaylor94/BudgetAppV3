@@ -104,6 +104,7 @@ public class AddExpenseFragment extends Fragment {
     private void saveExpense() {
         String name = binding.expenseNameInput.getText().toString().trim();
         String amountStr = binding.expenseAmountInput.getText().toString().trim();
+        String expenseCurrency = binding.currencySpinner.getText().toString().trim();
 
         if (name.isEmpty()) {
             binding.expenseNameLayout.setError("Please enter an expense name");
@@ -112,6 +113,11 @@ public class AddExpenseFragment extends Fragment {
 
         if (amountStr.isEmpty()) {
             binding.expenseAmountLayout.setError("Please enter an amount");
+            return;
+        }
+
+        if (expenseCurrency.isEmpty()) {
+            binding.currencySpinnerLayout.setError("Please select a currency");
             return;
         }
 
@@ -137,13 +143,61 @@ public class AddExpenseFragment extends Fragment {
 
         try {
             double amount = Double.parseDouble(amountStr);
-            
-            viewModel.saveExpense(name, amount, selectedBudget.getId(), selectedDate);
-            Toast.makeText(requireContext(), "Expense saved", Toast.LENGTH_SHORT).show();
-            Navigation.findNavController(requireView()).navigateUp();
+            String budgetCurrency = selectedBudget.getCurrency();
+
+            // Create final copies for lambda
+            final String finalName = name;
+            final Budget finalBudget = selectedBudget;
+            final String finalExpenseCurrency = expenseCurrency;
+
+            // If currencies are different, convert the amount
+            if (!expenseCurrency.equals(budgetCurrency)) {
+                // Show loading state
+                binding.saveButton.setEnabled(false);
+                binding.progressBar.setVisibility(View.VISIBLE);
+
+                // Convert amount to budget's currency
+                com.example.budgetv3.api.CurrencyApi.convertCurrency(
+                    expenseCurrency,
+                    budgetCurrency,
+                    amount,
+                    new com.example.budgetv3.api.CurrencyApi.ConversionCallback() {
+                        @Override
+                        public void onSuccess(double convertedAmount) {
+                            // Run on UI thread since we're updating UI
+                            requireActivity().runOnUiThread(() -> {
+                                saveExpenseToDatabase(finalName, convertedAmount, finalBudget, finalExpenseCurrency);
+                                binding.saveButton.setEnabled(true);
+                                binding.progressBar.setVisibility(View.GONE);
+                            });
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), 
+                                    "Error converting currency: " + errorMessage, 
+                                    Toast.LENGTH_LONG).show();
+                                binding.saveButton.setEnabled(true);
+                                binding.progressBar.setVisibility(View.GONE);
+                            });
+                        }
+                    });
+            } else {
+                // Same currency, no conversion needed
+                saveExpenseToDatabase(name, amount, selectedBudget, expenseCurrency);
+            }
         } catch (NumberFormatException e) {
             binding.expenseAmountLayout.setError("Please enter a valid amount");
         }
+    }
+
+    private void saveExpenseToDatabase(String name, double amount, Budget budget, String originalCurrency) {
+        viewModel.saveExpense(name, amount, budget.getId(), selectedDate, originalCurrency);
+        Toast.makeText(requireContext(), 
+            String.format("Expense saved (%.2f %s)", amount, budget.getCurrency()), 
+            Toast.LENGTH_SHORT).show();
+        Navigation.findNavController(requireView()).navigateUp();
     }
 
     @Override
